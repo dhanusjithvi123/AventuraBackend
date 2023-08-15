@@ -34,8 +34,8 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 
 const uploadImage = (req, res, next) => {
-    console.log("h;ahdafha;kjffkah;fakj");
-  upload.single('image')(req, res, (err) => {
+    
+  upload.single('image')(req, res, (err) => { 
     if (err) {
       console.error(err);
       if (err.message === 'File is not an image') {

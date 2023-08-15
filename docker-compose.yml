@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    image: nodejs
+    container_name: nodejs
+    restart: always
+    networks:
+      - app-network
+
+volumes:
+  certbot-etc:
+  certbot-var:
+
+networks:
+  app-network:
+    driver: bridge

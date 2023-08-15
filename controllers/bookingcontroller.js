@@ -85,14 +85,20 @@ const paymetcomformsend = async (req, res, next) => {
 const bookedlist = async (req, res, next) => {
   const { organisaerId } = req.params;
   try {
-    const bookedlist = await bookedModel.find({ organisaerId });
+    const bookedList = await bookedModel
+      .find({ organisaerId })
+      .populate('userId') // Populate the user details excluding password
+      .populate('eventId'); // Populate the event name
 
-    res.status(200).json({ bookedlist });
+    console.log(bookedList);
+
+    res.status(200).json({ bookedList });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 const userbookedlist = async (req, res, next) => {
   console.log("enter");
@@ -149,6 +155,47 @@ const cancelBookingStatus = async (req, res, next) => {
 };
 
 
+
+
+const organisaercancelBookingStatus = async (req, res, next) => {
+  const { bookingId } = req.params;
+  
+  try {
+    // Update the status of the booking to "cancelled" in the database
+    // For example, if you're using Mongoose:
+    const updatedBooking = await bookedModel.findByIdAndUpdate(
+      bookingId,
+      { Status: 'cancelled' },
+      { new: true }
+    );
+
+    res.status(200).json({ message: 'Booking cancelled successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cancelling booking' });
+  }
+};
+
+const organisaerfiniashBookingStatus = async (req, res, next) => {
+  const { bookingId } = req.params;
+  
+  try {
+    // Update the status of the booking to "cancelled" in the database
+    // For example, if you're using Mongoose:
+    const updatedBooking = await bookedModel.findByIdAndUpdate(
+      bookingId,
+      { Status: 'Finish' },
+      { new: true }
+    );
+
+    res.status(200).json({ message: 'Booking cancelled successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cancelling booking' });
+  }
+};
+
+
 const changeisbookig = async (req, res, next) => {
   const { bookingId } = req.params;
   
@@ -180,4 +227,6 @@ module.exports = {
   userbookedlist,
   checkBookingStatus,
   cancelBookingStatus,
+  organisaercancelBookingStatus,
+  organisaerfiniashBookingStatus,
 };

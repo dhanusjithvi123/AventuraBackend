@@ -72,6 +72,13 @@ const organisaerlogin = async (req, res) => {
       });
     }
 
+    if (organiser.verfiy==false) {
+      return res.status(403).send({
+        message: "Admin Not Approved",
+      });
+    }
+
+
     if (organiser.status==true) {
       return res.status(403).send({
         message: "Access denied. User is blocked.",
@@ -122,6 +129,15 @@ const organisaerList = async (req, res, next) => {
   }
 };
 
+const organisaerRequestList = async (req, res, next) => {
+  try {
+    const organisaers = await organisaersModel.find({verfiy: false});
+    res.json(organisaers);
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 const userorganisaerList = async (req, res, next) => {
   try {
@@ -164,11 +180,42 @@ const blocking = async (req, res, next) => {
 
 }
 
+
+
+const Requests = async (req, res, next) => {
+ 
+  const { organiserId } = req.params;
+  const { Request } = req.body;
+
+
+
+  try {
+    // Find the organizer by ID and update the status
+    const organizer = await organisaersModel.findByIdAndUpdate(
+      organiserId,
+      { $set: { Request} },
+      { new: false }
+    );
+
+    if (!organizer) {
+      return res.status(404).json({ error: 'Organizer not found' });
+    }
+
+    // Return the updated organizer
+    res.json(organizer);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+
+}
+
 const dashBoardDataGet = async (req, res) => {
   //month wise data
-  console.log(req.params);
-  const { organiserId } = req.params;
-  console.log("vvvvvvvvvvvvvvvvv" + organiserId);
+  // console.log(req.params);
+  
+  const { organisaerId } = req.params;
+  // console.log("vvvvvvvvvvvvvvvvv" + organiserId);
   
   // const vendorId = req.params.id;
 
@@ -304,7 +351,7 @@ const dashBoardDataGet = async (req, res) => {
 
   {
     $match: {
-      organisaerId: new mongoose.Types.ObjectId(organiserId),
+      organisaerId: new mongoose.Types.ObjectId(organisaerId),
 
         createdAt: { $gte: YEAR_BEFORE, $lte: TODAY }
 
@@ -419,25 +466,132 @@ const dashBoardDataGet = async (req, res) => {
       _id: 0
     }
   }]
- 
-
-  const packageChart = await  eventModel.aggregate(vendorPipeLine)
-  const orderChart = await  Booking.aggregate(pipeLine)
- 
-
-  console.log(packageChart);
-  console.log(orderChart);
-  res.json({
 
   
-    packageChart,
-    orderChart,
+
+ 
+
+  const packageChart = await eventModel.aggregate(vendorPipeLine);
+    const orderChart = await Booking.aggregate(pipeLine);
+    
+    console.log(packageChart);
+    console.log(orderChart);
+    
+    res.json({
+        packageChart,
+        orderChart,
+ 
   })
 
 }
 
 
+// const bookinggraph  = async (req, res, next) => {
+//   try {
+//     const {organisaerId } = req.params;
+//     console.log(organisaerId+"hhhhhhhh");
+//     const allBookings = await Booking.find({organisaerId}); // Retrieve all bookings from the database
+//     res.json(allBookings);
+//   } catch (error) {
+//     console.error("Error fetching bookings:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
 
+
+const dashboardData = async (req, res) => {
+  try {
+    console.log(req.params);
+    const { organisaerId} = req.params;
+
+    console.log("vvvvvvvvvvvvvvvvv" + organisaerId);
+
+    // Get total order amount
+    const orderTotal = await Booking.aggregate([
+      { $match: { organiserId: new mongoose.Types.ObjectId(organisaerId) } },
+    ]);
+
+    // Get total package count
+    const packageTotal = await eventModel.countDocuments({ organisaerId });
+
+    // Get total order count
+    const totalOrders = await Booking.countDocuments({ organisaerId });
+
+    const data = {
+      totalPackage: packageTotal,
+      totalCurrency: orderTotal.length > 0 ? orderTotal[0].total : 0,
+      totalOrders,
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error retrieving dashboard data" });
+  }
+};
+
+
+const edituser = async (req, res, next) => {
+  try {
+    const Organiser = await organisaersModel.findOne({ _id: req.params.id });
+
+    console.log(Organiser);
+    res.json(Organiser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+const updateUser = async (req, res, next) => {
+  try {
+    console.log("enterrr");
+    const organiserId = req.params.id;
+    const updatedUser = req.body;
+
+    const user = await organisaersModel.findOneAndUpdate({ _id: organiserId}, updatedUser, {
+      new: true,
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: 0, message: "User not found" });
+    }
+
+    user.block=true;
+
+    res.json({ success: 1, message: "User updated successfully", user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const verfiyconfrom = async (req, res, next) => {
+
+  const { organiserId } = req.params;
+  const { verfiy } = req.body;
+console.log("Enter");
+
+  try {
+    // Find the organizer by ID and update the status
+    const user = await organisaersModel.findByIdAndUpdate(
+      organiserId,
+      { $set: { verfiy } },
+      { new: true }
+    );
+
+ 
+    if (!user ) {
+      return res.status(404).json({ error: 'user  not found' });
+    }
+
+    // Return the updated organizer
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+
+}
 
 
 module.exports = {
@@ -448,5 +602,12 @@ module.exports = {
   blocking,
   userorganisaerList,
   dashBoardDataGet,
+  // bookinggraph,
+  dashboardData,
+  edituser,
+  updateUser,
+  organisaerRequestList,
+  verfiyconfrom,
+   
 
 };

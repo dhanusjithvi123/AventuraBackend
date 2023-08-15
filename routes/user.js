@@ -62,6 +62,8 @@ router.post('/logout',controller.logout)
 
 router.post('/login',controller.login)
 
+router.post('/forgotPasswordForm',controller.login)
+
 
 
 

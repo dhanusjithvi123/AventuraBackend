@@ -20,6 +20,8 @@ const bookingcontroller = require('../controllers/bookingcontroller')
 
 router.get('/organisaerList',organisaerscontroller.organisaerList)
 
+router.get('/organisaerRequestList',organisaerscontroller.organisaerRequestList)
+
 router.get('/eventlist/:organisaerId',eventcontroller.eventlist)
 
 router.post('/organisaerregister',organisaerscontroller.register)
@@ -40,8 +42,21 @@ router.put('/eventblocking/:id', eventcontroller.eventblocking);
 
 router.get('/bookedlist/:organisaerId',bookingcontroller.bookedlist );
 
-router.get('/dashbord/:organiserId',organisaerscontroller.dashBoardDataGet)
+router.get('/dashbord/:organisaerId',organisaerscontroller.dashBoardDataGet)
 
+// router.get('/bookinggraph/:organisaerId',organisaerscontroller.bookinggraph)
+
+router.put('/cancelBooking/:bookingId',bookingcontroller.organisaercancelBookingStatus);
+
+router.put('/finiashBooking/:bookingId',bookingcontroller.organisaerfiniashBookingStatus);
+
+router.get('/dashboardData/:organisaerId',organisaerscontroller.dashboardData);
+
+router.get('/editprofile/:id', organisaerscontroller.edituser);
+
+router.put('/updateprofile/:id',  organisaerscontroller.updateUser);
+
+router.put('/verfiyconfrom/:organiserId', organisaerscontroller.verfiyconfrom);
 
 module.exports = router
 
