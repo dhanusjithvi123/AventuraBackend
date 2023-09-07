@@ -10,6 +10,7 @@ let storeotp ;
 let otp = null; // Define otp variable
 const register = async (req, res, next) => {
   try {
+   
     const { firstName, lastName, phone, email, password, address } = req.body;
 
     // Check if email is already taken
@@ -69,7 +70,7 @@ const verifyUser = async (req, res, next) => {
 ;
 
     const { otp } = req.body;
-
+ console.log(storeotp+"storr");
 
     if (otp == storeotp) {
       // OTP is valid and matches

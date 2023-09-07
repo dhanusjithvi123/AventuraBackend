@@ -22,18 +22,38 @@ app.use(session({
   saveUninitialized: false
 }));
 
+
+app.use((req, res, next) => {                      
+  res.setHeader('Access-Control-Allow-Origin', "https://aventuraevents.netlify.app");
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true'); // Enable credentials
+
+  next();
+});
+
+const io = new Server(server, {
+  pingTimeout: 60000,
+  cors: {
+      credentials: true,
+      origin:"https://aventuraevents.netlify.app"
+  }
+});
+
+
 app.use(cors({
   credentials: true,
-  origin: ['https://aventuraevents.site/']
-}));
+  origin: "https://aventuraevents.netlify.app",
+  methods: ["GET,HEAD,OPTIONS,POST,PUT"]
+}))
 
 
+// app.options('*',cors())
 app.use(cookieParser());
 app.use(express.json());
 app.use("/", userRoutes);
 app.use("/admin", adminRoutes);
 app.use("/organisaer", organisaerRoutes);
-
 
   
     app.listen(5000, () => {

@@ -19,7 +19,7 @@ const sendVerifyEmail = async (userEmail, otp) => {
       text: `Your OTP code is ${otp}. Please enter this code to verify your email address.`,
       html: `<p>Your OTP code is <strong>${otp}</strong>. Please enter this code to verify your email address.</p>`,
     };
-
+ 
     const info = await transporter.sendMail(mailOptions);
     console.log('Email sent successfully:', info.messageId);
   } catch (error) {
