@@ -32,13 +32,6 @@ app.use((req, res, next) => {
   next();
 });
 
-const io = new Server(server, {
-  pingTimeout: 60000,
-  cors: {
-      credentials: true,
-      origin:"https://aventuraevents.netlify.app"
-  }
-});
 
 
 app.use(cors({
@@ -47,8 +40,7 @@ app.use(cors({
   methods: ["GET,HEAD,OPTIONS,POST,PUT"]
 }))
 
-
-// app.options('*',cors())
+app.options('*',cors())
 app.use(cookieParser());
 app.use(express.json());
 app.use("/", userRoutes);
