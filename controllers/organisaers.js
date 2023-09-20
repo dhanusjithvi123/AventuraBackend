@@ -6,6 +6,7 @@ const eventModel = require("../models/events");
 const mongoose = require('mongoose');
 const User = require("../models/user");
 const Booking = require("../models/booking");
+const Admin = require("../models/admin");
 
 
 const register = async (req, res, next) => {
@@ -60,6 +61,8 @@ const organisaerlogin = async (req, res) => {
   try {
     const organiser = await organisaersModel.findOne({ email: req.body.email });
 
+    const admin = await Admin.findOne({ email: "dhanusjith@gmail.com"});
+
     if (!organiser) {
       return res.status(404).send({
         message: "User not found",
@@ -90,6 +93,7 @@ const organisaerlogin = async (req, res) => {
     res.send({
       token: token,
       userId: organiser._id,
+      adminId: admin._id,
       message: "Success",
     });
   } catch (error) {
@@ -141,7 +145,8 @@ const organisaerRequestList = async (req, res, next) => {
 
 const userorganisaerList = async (req, res, next) => {
   try {
-    const organisaers = await organisaersModel.find({ status: false});
+    const organisaers = await organisaersModel.find({ verfiy: true});
+    console.log(organisaers);
     res.json(organisaers);
   } catch (error) {
     next(error);
@@ -210,301 +215,18 @@ const Requests = async (req, res, next) => {
 
 }
 
-const dashBoardDataGet = async (req, res) => {
-  //month wise data
-  // console.log(req.params);
-  
-  const { organisaerId } = req.params;
-  // console.log("vvvvvvvvvvvvvvvvv" + organiserId);
-  
-  // const vendorId = req.params.id;
 
 
-  //month wise data
-  const FIRST_MONTH = 1
-  const LAST_MONTH = 12
-  const TODAY = new Date()
-  const YEAR_BEFORE = new Date(TODAY)
-  YEAR_BEFORE.setFullYear(YEAR_BEFORE.getFullYear() - 1)
-  console.log(TODAY, YEAR_BEFORE)
-  const MONTHS_ARRAY = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-  const pipeLine = [
-    
-  {
-    $match: {
-        createdAt: { $gte: YEAR_BEFORE, $lte: TODAY }
-
-    },
-  },
-
-  {
-    $group: {
-      _id: { year_month: { $substrCP: ["$createdAt", 0, 7] } },
-      count: { $sum: 1 }
-    }
-  },
-  {
-    $sort: { "_id.year_month": 1 }
-  },
-  {
-    $project: {
-      _id: 0,
-      count: 1,
-      month_year: {
-        $concat: [
-          { $arrayElemAt: [MONTHS_ARRAY, { $subtract: [{ $toInt: { $substrCP: ["$_id.year_month", 5, 2] } }, 1] }] },
-          "-",
-          { $substrCP: ["$_id.year_month", 0, 4] }
-        ]
-      }
-    }
-  },
-  {
-    $group: {
-      _id: null,
-      data: { $push: { k: "$month_year", v: "$count" } }
-    }
-  },
-  {
-    $addFields: {
-      start_year: { $substrCP: [YEAR_BEFORE, 0, 4] },
-      end_year: { $substrCP: [TODAY, 0, 4] },
-      months1: { $range: [{ $toInt: { $substrCP: [YEAR_BEFORE, 5, 2] } }, { $add: [LAST_MONTH, 1] }] },
-      months2: { $range: [FIRST_MONTH, { $add: [{ $toInt: { $substrCP: [TODAY, 5, 2] } }, 1] }] }
-    }
-  },
-  {
-    $addFields: {
-      template_data: {
-        $concatArrays: [
-          {
-            $map: {
-              input: "$months1",
-              as: "m1",
-              in: {
-                count: 0,
-                month_year: {
-                  $concat: [
-                    { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ["$$m1", 1] }] },
-                    "-",
-                    "$start_year"
-                  ]
-                }
-              }
-            }
-          },
-          {
-            $map: {
-              input: "$months2",
-              as: "m2",
-              in: {
-                count: 0,
-                month_year: {
-                  $concat: [
-                    { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ["$$m2", 1] }] },
-                    "-",
-                    "$end_year"
-                  ]
-                }
-              }
-            }
-          }
-        ]
-      }
-    }
-  },
-  {
-    $addFields: {
-      data: {
-        $map: {
-          input: "$template_data",
-          as: "t",
-          in: {
-            k: "$$t.month_year",
-            v: {
-              $reduce: {
-                input: "$data",
-                initialValue: 0,
-                in: {
-                  $cond: [
-                    { $eq: ["$$t.month_year", "$$this.k"] },
-                    { $add: ["$$this.v", "$$value"] },
-                    { $add: [0, "$$value"] }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  {
-    $project: {
-      data: { $arrayToObject: "$data" },
-      _id: 0
-    }
-  }]
-  const vendorPipeLine = [
-    
- 
-
-  {
-    $match: {
-      organisaerId: new mongoose.Types.ObjectId(organisaerId),
-
-        createdAt: { $gte: YEAR_BEFORE, $lte: TODAY }
-
-    },
-  },
-
-  {
-    $group: {
-      _id: { year_month: { $substrCP: ["$createdAt", 0, 7] } },
-      count: { $sum: 1 }
-    }
-  },
-  {
-    $sort: { "_id.year_month": 1 }
-  },
-  {
-    $project: {
-      _id: 0,
-      count: 1,
-      month_year: {
-        $concat: [
-          { $arrayElemAt: [MONTHS_ARRAY, { $subtract: [{ $toInt: { $substrCP: ["$_id.year_month", 5, 2] } }, 1] }] },
-          "-",
-          { $substrCP: ["$_id.year_month", 0, 4] }
-        ]
-      }
-    }
-  },
-  {
-    $group: {
-      _id: null,
-      data: { $push: { k: "$month_year", v: "$count" } }
-    }
-  },
-  {
-    $addFields: {
-      start_year: { $substrCP: [YEAR_BEFORE, 0, 4] },
-      end_year: { $substrCP: [TODAY, 0, 4] },
-      months1: { $range: [{ $toInt: { $substrCP: [YEAR_BEFORE, 5, 2] } }, { $add: [LAST_MONTH, 1] }] },
-      months2: { $range: [FIRST_MONTH, { $add: [{ $toInt: { $substrCP: [TODAY, 5, 2] } }, 1] }] }
-    }
-  },
-  {
-    $addFields: {
-      template_data: {
-        $concatArrays: [
-          {
-            $map: {
-              input: "$months1",
-              as: "m1",
-              in: {
-                count: 0,
-                month_year: {
-                  $concat: [
-                    { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ["$$m1", 1] }] },
-                    "-",
-                    "$start_year"
-                  ]
-                }
-              }
-            }
-          },
-          {
-            $map: {
-              input: "$months2",
-              as: "m2",
-              in: {
-                count: 0,
-                month_year: {
-                  $concat: [
-                    { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ["$$m2", 1] }] },
-                    "-",
-                    "$end_year"
-                  ]
-                }
-              }
-            }
-          }
-        ]
-      }
-    }
-  },
-  {
-    $addFields: {
-      data: {
-        $map: {
-          input: "$template_data",
-          as: "t",
-          in: {
-            k: "$$t.month_year",
-            v: {
-              $reduce: {
-                input: "$data",
-                initialValue: 0,
-                in: {
-                  $cond: [
-                    { $eq: ["$$t.month_year", "$$this.k"] },
-                    { $add: ["$$this.v", "$$value"] },
-                    { $add: [0, "$$value"] }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  {
-    $project: {
-      data: { $arrayToObject: "$data" },
-      _id: 0
-    }
-  }]
-
-  
-
- 
-
-  const packageChart = await eventModel.aggregate(vendorPipeLine);
-    const orderChart = await Booking.aggregate(pipeLine);
-    
-    console.log(packageChart);
-    console.log(orderChart);
-    
-    res.json({
-        packageChart,
-        orderChart,
- 
-  })
-
-}
 
 
-// const bookinggraph  = async (req, res, next) => {
-//   try {
-//     const {organisaerId } = req.params;
-//     console.log(organisaerId+"hhhhhhhh");
-//     const allBookings = await Booking.find({organisaerId}); // Retrieve all bookings from the database
-//     res.json(allBookings);
-//   } catch (error) {
-//     console.error("Error fetching bookings:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
 
 
 const dashboardData = async (req, res) => {
   try {
-    console.log(req.params);
+   
     const { organisaerId} = req.params;
 
-    console.log("vvvvvvvvvvvvvvvvv" + organisaerId);
+  
 
     // Get total order amount
     const orderTotal = await Booking.aggregate([
@@ -601,7 +323,7 @@ module.exports = {
   rent,
   blocking,
   userorganisaerList,
-  dashBoardDataGet,
+  // dashBoardDataGet,
   // bookinggraph,
   dashboardData,
   edituser,

@@ -3,18 +3,19 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-
-const app = express();
-
+const socketIo = require('socket.io');
+const http = require('http');
+const socketConnect = require('./config/socketConnect.js');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const organisaerRoutes = require('./routes/organisaers');
 
-const bodyParser = require('body-parser');
-const organisaers = require('./models/organisaers');
-const multer = require('multer');
-const db= require('./config/connection')
+const db = require('./config/connection');
+
 db();
+
+const app = express();
+const server = http.createServer(app);
 
 app.use(session({
   secret: 'your-secret-key',
@@ -33,21 +34,30 @@ app.use((req, res, next) => {
 });
 
 
-
 app.use(cors({
   credentials: true,
-  origin: "https://aventuraevents.netlify.app",
+  origin: ['https://aventuraevents.netlify.app'],
   methods: ["GET,HEAD,OPTIONS,POST,PUT"]
-}))
+}));
 
-app.options('*',cors())
 app.use(cookieParser());
 app.use(express.json());
 app.use("/", userRoutes);
 app.use("/admin", adminRoutes);
 app.use("/organisaer", organisaerRoutes);
 
-  
-    app.listen(5000, () => {
-      console.log("App is listening on port 5000");
-    });
+
+const io = socketIo(server, {
+  pingTimeout: 60000,
+  cors: {
+    credentials: true,
+    origin: 'https://aventuraevents.netlify.app'
+  }
+});
+
+let activeUsers = {};
+socketConnect(io, activeUsers);
+
+server.listen(5000, () => {
+  console.log("App is listening on port 5000");
+});

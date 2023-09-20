@@ -163,6 +163,40 @@ const login = async (req, res) => {
   });
 };
 
+
+
+const emailentering = async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return res.status(404).send({
+      message: "User not found",
+    });
+  }
+
+  if (user.status==true) {
+    return res.status(403).send({
+      message: "Access denied. User is blocked.",
+    });
+  }
+
+  const token = jwt.sign({ _id: user._id }, "secret");
+
+  res.cookie("jwt", token, {
+    httpOnly: true,
+    maxAge: 100000,
+  });
+
+  res.send({
+    userId: user._id,
+    message: "Success",
+  });
+};
+
+
+
+
+
+
 const usersList = async (req, res, next) => {
   try {
     const users = await User.find();
@@ -203,6 +237,36 @@ const updateUser = async (req, res, next) => {
     next(error);
   }
 };
+
+
+const newpassword = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const newPassword = req.body.password; // Assuming the new password is sent in the request body
+
+    // Hash the new password before updating it in the database
+    const hash = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { password: hash }, // Update the password field with the hashed password
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: 0, message: "User not found" });
+    }
+   
+    res.json({ success: 1, message: "Password updated successfully" });
+    
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
 
 const deleteUser = async (req, res, next) => {
   try {
@@ -302,6 +366,8 @@ module.exports = {
   verifyUser,
   blocking,
   booking,
+  emailentering,
+  newpassword,
  
  
 };

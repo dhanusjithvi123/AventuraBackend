@@ -62,6 +62,10 @@ router.post('/logout',controller.logout)
 
 router.post('/login',controller.login)
 
+router.post('/emailentering',controller.emailentering)
+
+router.put('/newpassword/:id', controller.newpassword);
+
 router.post('/forgotPasswordForm',controller.login)
 
 

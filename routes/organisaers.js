@@ -24,6 +24,8 @@ router.get('/organisaerRequestList',organisaerscontroller.organisaerRequestList)
 
 router.get('/eventlist/:organisaerId',eventcontroller.eventlist)
 
+router.get('/eventlists/:organisaerId',eventcontroller.eventlistchart)
+
 router.post('/organisaerregister',organisaerscontroller.register)
 
 router.post('/organisaerlogin',organisaerscontroller.organisaerlogin)
@@ -42,7 +44,7 @@ router.put('/eventblocking/:id', eventcontroller.eventblocking);
 
 router.get('/bookedlist/:organisaerId',bookingcontroller.bookedlist );
 
-router.get('/dashbord/:organisaerId',organisaerscontroller.dashBoardDataGet)
+// router.get('/dashbord/:organisaerId',organisaerscontroller.dashBoardDataGet)
 
 // router.get('/bookinggraph/:organisaerId',organisaerscontroller.bookinggraph)
 

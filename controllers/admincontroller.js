@@ -30,6 +30,7 @@ const adminlogin = async (req, res) => {
 
     res.send({
       token: token,
+     adminId: admin._id, // Include the user ID in the response
       message: "Success",
     });
   } catch (error) {
@@ -39,6 +40,7 @@ const adminlogin = async (req, res) => {
     });
   }
 };
+
 
 
 const logout = (req, res, next) => {

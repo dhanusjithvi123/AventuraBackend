@@ -6,12 +6,10 @@ const organisaerSchema = new mongoose.Schema({
     type: String,
     require: true,
   },
-
   lastName: {
     type: String,
     require: true,
   },
-
   companyName: {
     type: String,
     require: true,
@@ -43,11 +41,10 @@ const organisaerSchema = new mongoose.Schema({
     type:Boolean,
     default: false,
   },
-  status :{
-    type: Boolean,
-    default:false,
-   },
- 
+},
+{
+  timestamps: true,
+
 });
 
 module.exports = mongoose.model("organisaers", organisaerSchema);

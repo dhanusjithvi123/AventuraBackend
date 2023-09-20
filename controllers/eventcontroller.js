@@ -35,6 +35,7 @@ const eventadding = async (req, res, next) => {
 };
 
 const eventlist = async (req, res, next) => {
+  
   const { organisaerId } = req.params;
   try {
     const events = await eventModel.find({ organisaerId });
@@ -45,6 +46,26 @@ const eventlist = async (req, res, next) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+
+
+const eventlistchart = async (req, res, next) => {
+  const { organisaerId } = req.params;
+  console.log("ENTERR");
+  try {
+    const events = await eventModel.find({ organisaerId });
+
+    // Extract and concatenate all 'createdAt' values into one array
+    const createdAtValues = [].concat(...events.map(event => event.createdAt));
+console.log(createdAtValues);
+    res.status(200).json({ createdAt: createdAtValues });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
 
 const editevent = async (req, res, next) => {
   try {
@@ -85,7 +106,7 @@ const updateevent = async (req, res, next) => {
 const usereventlist = async (req, res, next) => {
   try {
     const events = await eventModel.find({ status: false }).populate("organisaerId");
-    console.log(events);
+  
     res.json(events);
   } catch (error) {
     next(error);
@@ -96,8 +117,7 @@ const usereventlist = async (req, res, next) => {
 
 
 const eventblocking = async (req, res, next) => {
-  console.log("enter");
-  console.log(req.body);
+
   const eventId = req.params.id; // Corrected parameter name
   const { status } = req.body;
 
@@ -133,5 +153,6 @@ module.exports = {
   updateevent,
   usereventlist,
   eventblocking,
+  eventlistchart,
 
 };
