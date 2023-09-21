@@ -3,12 +3,13 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const socketIo = require('socket.io');
 const http = require('http');
 const socketConnect = require('./config/socketConnect.js');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const organisaerRoutes = require('./routes/organisaers');
-const { Server } = require('socket.io');
+
 const db = require('./config/connection');
 
 db();
@@ -46,7 +47,7 @@ app.use("/admin", adminRoutes);
 app.use("/organisaer", organisaerRoutes);
 
 
-const io =  new  Server(server, {
+const io = socketIo(server, {
   pingTimeout: 60000,
   cors: {
     credentials: true,
