@@ -25,7 +25,7 @@ app.use(session({
 
 
 app.use((req, res, next) => {                      
-  res.setHeader('Access-Control-Allow-Origin', "https://aventuraevents.netlify.app");
+  res.setHeader('Access-Control-Allow-Origin', "http://localhost:4200");
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true'); // Enable credentials
@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 
 app.use(cors({
   credentials: true,
-  origin: ['https://aventuraevents.netlify.app'],
+  origin: ['http://localhost:4200'],
   methods: ["GET,HEAD,OPTIONS,POST,PUT"]
 }));
 
@@ -51,7 +51,7 @@ const io = socketIo(server, {
   pingTimeout: 60000,
   cors: {
     credentials: true,
-    origin: 'https://aventuraevents.netlify.app'
+    origin: 'http://localhost:4200'
   }
 });
 
